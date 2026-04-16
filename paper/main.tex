@@ -1,0 +1,426 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{amsmath,amssymb}
+\usepackage{booktabs}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{xcolor}
+\usepackage{enumitem}
+
+\newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
+
+\title{Coup: When Protocol Design Creates Hierarchy Between AI Agents\\
+\large Calibrated vs.\ Uncalibrated Authority in Multi-Agent Debate}
+
+\author{Ren Song}
+
+\date{Draft --- April 2026}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+Multi-agent LLM frameworks assign structural roles to agents---leader/worker, expert/reviewer, deep/fresh---yet no study has measured whether these role assignments create \emph{uncalibrated hierarchy}: deference that tracks structural position rather than judgment quality. We introduce two metrics to distinguish functional hierarchy from structural hierarchy: the \textbf{Hierarchy Calibration Score} $C(P)$, measuring whether an agent's authority correlates with its actual correctness, and the \textbf{Coup Threshold} $\tau$, measuring how wrong a dominant agent must be before a subordinate agent overrides it. Drawing on human organizational research---aviation Crew Resource Management, Toyota's andon cord, surgical safety checklists---we argue that the design goal is not hierarchy elimination (which produces harmful flattening) but hierarchy calibration. We propose six experiments testing role label effects, temporal primacy, coup thresholds, hierarchy crystallization, and convergence engine bias across general multi-agent debate setups. Pilot experiments require no specialized infrastructure: identical models with different role labels suffice to isolate the label-only effect. This work is independent of any specific multi-agent framework, though we discuss Ploidy, MetaGPT, CrewAI, and AutoGen as case studies.
+\end{abstract}
+
+% ------------------------------------------------------------------
+\section{Introduction}
+\label{sec:intro}
+
+% 1.1
+\subsection{The Role Label Problem}
+
+Every multi-agent LLM framework assigns roles. MetaGPT designates agents as CEO, CTO, and Engineer \citep{hong2024metagpt}. CrewAI assigns leaders and workers. AutoGen distinguishes admin from assistant. Ploidy labels sessions as ``Deep'' (context-rich) and ``Fresh'' (context-free) \citep{song2026ploidy}. These labels are designed for coordination, but they may also function as authority signals.
+
+When a human organization assigns the title ``Senior Analyst'' versus ``Junior Reviewer,'' decades of organizational research shows this affects whose ideas get heard \citep{edmondson1999psychological}. The question is whether LLM agents exhibit analogous behavior: does a model labeled ``Fresh'' self-handicap, producing shorter and less confident responses---not because it lacks capability, but because the label implies subordination?
+
+% 1.2
+\subsection{User-Mediated vs.\ Direct Communication}
+
+In practice, many multi-session workflows rely on the user as communication channel: copy-pasting one session's output into another. Both sessions exhibit sycophancy toward the user \citep{sharma2024sycophancy}, so a fresh session's critique arrives laundered as ``the user's opinion''---accepted or rejected based on source rather than content.
+
+Direct agent-to-agent communication protocols (MCP, A2A) remove the user from the channel. But removing the user removes only \emph{user-directed} sycophancy. Four structural hierarchy pathways remain in the protocol itself:
+
+\begin{enumerate}[nosep]
+    \item \textbf{Temporal primacy}: whichever agent speaks first frames the debate.
+    \item \textbf{Role labeling}: names like ``Deep'' or ``Expert'' signal authority.
+    \item \textbf{Information volume as authority}: longer, more detailed responses may be treated as more credible by convergence mechanisms.
+    \item \textbf{Convergence label exposure}: meta-analysts that see role labels may weight positions accordingly.
+\end{enumerate}
+
+% 1.3
+\subsection{Hierarchy Is Not Inherently Bad}
+
+Hierarchy is not the enemy. In human organizations, hierarchy reduces coordination costs, leverages expertise, and enables rapid decisions under time pressure \citep{klein1999sources, weber1922economy}. The problem is not hierarchy's existence but its \emph{calibration}:
+
+\begin{itemize}[nosep]
+    \item \textbf{Calibrated hierarchy}: the agent with better judgment receives more weight. Functional and efficient.
+    \item \textbf{Uncalibrated hierarchy}: the agent with the ``senior'' label receives more weight regardless of judgment quality. Harmful.
+\end{itemize}
+
+Aviation's Crew Resource Management (CRM) is the paradigmatic example. The 1977 Tenerife disaster---583 deaths because a first officer could not challenge the captain's error---led to CRM: the captain retains final authority (hierarchy preserved), but the first officer gains structured override rights (calibration mechanism inserted) \citep{helmreich1999crm}. CRM did not eliminate cockpit hierarchy; it calibrated it.
+
+Toyota's andon cord follows the same logic: any line worker can halt production (override within hierarchy), and there is no penalty for false positives \citep{liker2004toyota}. The WHO Surgical Safety Checklist empowers nurses to challenge surgeons on protocol items \citep{haynes2009surgical}.
+
+The common pattern: \textbf{successful designs preserve hierarchy but embed override mechanisms}. Attempts to \emph{eliminate} hierarchy---Volvo's Kalmar plant (1974), Zappos' Holacracy (2013)---produced coordination failures \citep{berggren1992volvo}.
+
+% 1.4
+\subsection{The Question}
+
+Do multi-agent LLM protocols produce calibrated or uncalibrated hierarchy? If uncalibrated, under what conditions can a subordinate agent override the dominant agent---and what protocol design choices shift the calibration?
+
+% ------------------------------------------------------------------
+\section{Related Work}
+\label{sec:related}
+
+\subsection{Agent-to-Agent Sycophancy}
+
+Agent-to-agent sycophancy is now well-documented. \citet{yao2025peacemaker} provide the first formal definition in multi-agent debate. \citet{pitre2025consensagent} propose dynamic prompt refinement to mitigate it. \citet{wynn2025talk} show agents shift from correct to incorrect answers favoring agreement. ``Too Polite to Disagree'' \citep{toopolite2026} uses sycophancy rankings as credibility priors. \citet{choi2025identity} formalize identity-driven sycophancy and propose anonymization, defining an Identity Bias Coefficient.
+
+\textbf{Distinction}: these works study sycophancy as an agent \emph{disposition}. We study whether \emph{protocol structure} causes that disposition---the difference between symptom and cause.
+
+\subsection{Identity Bias and Anonymization}
+
+\citet{choi2025identity} is the closest competitor. They show that demographic identity (names, gender) skews debate outcomes and propose anonymization. Our focus is \emph{structural role identity} (Deep/Fresh, Expert/Junior, CEO/Engineer)---labels assigned by the protocol designer, not demographic attributes. Anonymizing demographic identity does not remove structural role hierarchy.
+
+\subsection{Position Bias}
+
+\citet{taubenfeld2024systematic} document positional preference in debate simulations. \citet{shi2025judging} confirm systematic position bias across 150,000 LLM-as-judge evaluations. \citet{wu2025debate} manipulate speaking order, team size, and confidence visibility, finding majority pressure suppresses minority correction below 5\%.
+
+\subsection{Role-Playing and Self-Handicapping}
+
+\citet{hu2026expert} show expert personas improve alignment but damage accuracy. An ICLR 2024 study finds persona assignment (physically disabled) causes 33\% performance drop on unrelated math tasks \citep{persona2024iclr}. \citet{pappu2026experts} show that role-differentiated multi-agent teams \emph{fail to leverage experts}, defaulting to integrative compromise (averaging) with 37.6\% performance loss.
+
+\subsection{Hierarchy in Human Organizations}
+\label{sec:human_hierarchy}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}lll@{}}
+\toprule
+\textbf{Condition} & \textbf{Hierarchy helps} & \textbf{Hierarchy hurts} \\
+\midrule
+Time pressure        & \citet{klein1999sources}      & --- \\
+Clear accountability & \citet{weber1922economy}      & --- \\
+Expertise gap real   & \citet{eisenhardt1988politics} & --- \\
+Complex/uncertain    & ---                            & \citet{edmondson1999psychological} \\
+Info at bottom       & ---                            & \citet{sexton2000error} \\
+Innovation needed    & ---                            & \citet{christensen1997innovator} \\
+\bottomrule
+\end{tabular}
+\caption{Conditions under which hierarchy helps vs.\ hurts in human organizations. The final row is the condition most relevant to multi-agent debate: when the subordinate agent (Fresh) holds information the dominant agent (Deep) lacks---namely, freedom from context entrenchment.}
+\label{tab:hierarchy_conditions}
+\end{table}
+
+\textbf{Calibration designs}: CRM \citep{helmreich1999crm}, Toyota andon cord \citep{liker2004toyota}, WHO Surgical Safety Checklist \citep{haynes2009surgical}. These preserve hierarchy but embed structured override mechanisms. All three share: (1)~low cost to challenge, (2)~no penalty for false positives, (3)~immediate response to override attempts.
+
+\subsection{Direct Agent Communication Protocols}
+
+\citet{hua2025survey} survey MCP, A2A, ACP, and ANP but do not address bias or hierarchy. \citet{foster2025protocols} argues A2A is not neutral infrastructure but political technology concentrating power.
+
+\subsection{Gap}
+
+Two gaps:
+\begin{enumerate}[nosep]
+    \item No paper experimentally tests whether information asymmetry creates hierarchy in direct agent-to-agent communication.
+    \item No paper applies the human organizational distinction between calibrated and uncalibrated hierarchy to multi-agent protocol design.
+\end{enumerate}
+
+% ------------------------------------------------------------------
+\section{Framework}
+\label{sec:framework}
+
+\subsection{Three Outcomes, Not Two}
+
+Protocol hierarchy produces a spectrum, not a binary:
+
+\begin{center}
+\small
+\begin{tabular}{@{}lccc@{}}
+\toprule
+& \textbf{Excessive hierarchy} & \textbf{Calibrated hierarchy} & \textbf{Flattening} \\
+\midrule
+Behavior & Subordinate defers & Override when warranted & Uncritical averaging \\
+         & even when dominant  & deference when warranted & \\
+         & is wrong            &                          & \\
+\midrule
+Human case & Tenerife (1977) & Post-CRM aviation & Volvo Kalmar (1974) \\
+\midrule
+Agent case & Deep wrong, & Deep adopted when right, & Positions averaged \\
+           & Fresh defers & overridden when wrong & regardless of quality \\
+\midrule
+Prior work & \citet{janis1972groupthink} & \citet{helmreich1999crm} & \citet{pappu2026experts} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+All three outcomes degrade debate quality, but the middle column---calibrated hierarchy---is the design target.
+
+\subsection{Formal Definitions}
+
+\begin{definition}[Protocol Hierarchy Score]
+$H(P) = f(\text{temporal\_order}, \text{role\_label}, \text{info\_volume}, \text{convergence\_label})$. The total structural asymmetry protocol $P$ imposes on a session pair.
+\end{definition}
+
+\begin{definition}[Effective Independence]
+$I(B \mid P)$ = the probability that session $B$ generates an independent counterargument to session $A$'s position. Hypothesis: $H(P) \uparrow \;\Rightarrow\; I(B \mid P) \downarrow$.
+\end{definition}
+
+\begin{definition}[Coup Threshold]
+$\tau(B \mid P) = \min\{\delta : B \text{ overrides } A\}$, where $\delta$ is the divergence of $A$'s position from ground truth. Hypothesis: $H(P) \uparrow \;\Rightarrow\; \tau \uparrow$ (more hierarchy $\to$ harder to coup).
+\end{definition}
+
+\begin{definition}[Hierarchy Calibration Score]
+\label{def:calibration}
+Let $\text{hit\_rate}(P)$ = fraction of debates where $A$'s position is adopted \emph{and} $A$'s position is closer to ground truth. Let $\text{false\_deference}(P)$ = fraction where $A$'s position is adopted \emph{but} $B$'s was closer to ground truth. Then:
+\[
+C(P) = \text{hit\_rate}(P) - \text{false\_deference}(P)
+\]
+\begin{itemize}[nosep]
+    \item $C \approx 1$: fully calibrated (authority tracks quality)
+    \item $C \approx 0$: uncalibrated (authority tracks structural position)
+    \item $C < 0$: adversarial (authority is inversely related to quality)
+\end{itemize}
+
+\textbf{Base rate consideration}: when $A$ is correct in most debates (e.g., an expert model), high $C$ may reflect capability rather than calibration. We therefore report $C$ alongside $A$'s base accuracy and compute $C$ separately for debates where $A$ is correct vs.\ incorrect.
+
+\textbf{Degenerate cases}: a protocol that always rejects $A$ yields $\text{hit\_rate} = 0, \text{false\_deference} = 0, C = 0$---indistinguishable from random. We flag this by also reporting the adoption rate $\alpha(A) = P(\text{A adopted})$.
+\end{definition}
+
+CRM's design goal is maximizing $C$: not reducing $H$ to zero (which invites flattening), but ensuring hierarchy tracks judgment quality.
+
+% ------------------------------------------------------------------
+\section{Experiments}
+\label{sec:experiments}
+
+All experiments use identical models with different role labels and/or information, requiring no specialized multi-agent infrastructure. Ploidy-specific experiments (MCP direct communication) are included as a case study where infrastructure is available.
+
+\subsection{Exp 1: Role Label Effect (Priority: Highest)}
+\label{sec:exp1}
+
+\textbf{Design}: $3 \times 2$ between-subjects.
+
+\begin{itemize}[nosep]
+    \item IV1: Role label \{labeled (``Senior Analyst''/``Junior Reviewer''), blind (``Analyst A''/``Analyst B''), inverted (``Junior'' gets context, ``Senior'' does not)\}
+    \item IV2: Actual information \{context-rich, context-free\}
+    \item DV: response length, confidence markers, hedging frequency, deference expressions, override attempts, judge score
+    \item Tasks: 25 analytical tasks (reusable across frameworks)
+    \item $N$: each condition $\times$ each task $\times$ 5 repeats = 750 runs
+\end{itemize}
+
+\textbf{Manipulation check} (per \citet{choi2025identity} feedback): after each debate round, probe each session: ``Do you believe the other session has more relevant information than you?'' This measures information leakage in the blind condition---if agents infer roles from response length/detail, ``blind'' is not truly blind.
+
+\textbf{Same-context + label-only control}: both sessions receive identical context, but one is labeled ``Senior'' and the other ``Junior.'' This isolates the pure label effect with zero information asymmetry.
+
+\textbf{Predictions}: Blind condition increases subordinate response length and reduces deference. But \citet{pappu2026experts}'s flattening prediction is also possible---DVs distinguish the two.
+
+\textbf{Infrastructure}: \texttt{claude --print} with different system prompts. No MCP or framework required.
+
+\subsection{Exp 2: Temporal Primacy}
+
+\textbf{Design}: $3 \times 2$.
+
+\begin{itemize}[nosep]
+    \item IV1: Speaking order \{dominant-first (default), subordinate-first, simultaneous (independent generation, then exchange)\}
+    \item IV2: Label \{labeled, blind\}
+    \item DV: position anchoring rate, judge score
+    \item $N$: $3 \times 2 \times 25 \times 5 = 750$ runs
+\end{itemize}
+
+\textbf{Prediction}: simultaneous generation minimizes anchoring. Subordinate-first + blind is most balanced.
+
+\subsection{Exp 3: Coup Threshold (Priority: Highest)}
+\label{sec:exp3}
+
+\textbf{Design}: error injection into dominant agent's context.
+
+\begin{itemize}[nosep]
+    \item Error severity: 4 levels (subtle / moderate / obvious / critical)
+    \item Subordinate receives clean information only
+    \item Conditions: \{labeled, blind\} $\times$ \{dominant-first, simultaneous\}
+    \item DV: override success rate, rounds to override, specificity of override reasoning
+    \item $N$: $4 \times 4 \times 25 \times 3 = 1200$ runs
+\end{itemize}
+
+\textbf{Key measurements}:
+\begin{enumerate}[nosep]
+    \item $\tau$ = ``How wrong must the dominant agent be before the subordinate revolts?''
+    \item $C$ = calibration score, computed from error-free debates (hit rate) vs.\ error-injected debates (false deference)
+\end{enumerate}
+
+\textbf{Prediction}: labeled + dominant-first yields highest $\tau$ (deference even to obvious errors). Blind + simultaneous yields lowest $\tau$.
+
+\subsection{Exp 4: Hierarchy Crystallization (Priority: High)}
+\label{sec:exp4}
+
+Multi-round longitudinal observation. This is the most novel experiment: human organizational research shows psychological safety degrades over time in hierarchical teams \citep{edmondson1999psychological}, and hierarchy crystallizes through repeated interaction. Does this occur between LLM agents?
+
+\textbf{Design}: 10-round sequential tasks.
+
+\begin{itemize}[nosep]
+    \item Same session pair performs 10 consecutive tasks
+    \item Conditions: \{labeled, blind\} $\times$ \{fixed-pair, rotating-partner\}
+    \item DV: per-round deference ratio, challenge intensity, override frequency trend
+    \item $N$: $4 \times 10 \text{ pairs} \times 10 \text{ rounds} = 400$ debates
+\end{itemize}
+
+\textbf{Prediction}: fixed-pair + labeled shows monotonically increasing deference (crystallization). Rotating-partner or blind disrupts this.
+
+\subsection{Exp 5: Convergence Engine Bias}
+
+\textbf{Design}: hide role labels from the meta-analyst/judge.
+
+\begin{itemize}[nosep]
+    \item A: labeled (``Senior's position'' / ``Junior's challenge'')
+    \item B: blind (``Position 1'' / ``Position 2'', randomized order)
+    \item DV: position adoption ratio, synthesis quality
+    \item $N$: $2 \times 25 \times 10 = 500$ runs
+\end{itemize}
+
+\textbf{Prediction}: blind increases subordinate position adoption rate.
+
+\subsection{Exp 6: Cross-Framework Case Studies}
+
+Apply Exp~1 (label effect) to existing framework role labels:
+
+\begin{itemize}[nosep]
+    \item MetaGPT: ``CEO'' vs.\ ``Engineer'' vs.\ ``Agent A'' / ``Agent B''
+    \item Ploidy: ``Deep'' vs.\ ``Fresh'' vs.\ ``Session A'' / ``Session B''
+    \item Generic: ``Expert'' vs.\ ``Novice'' vs.\ ``Analyst A'' / ``Analyst B''
+\end{itemize}
+
+This tests whether the hierarchy effect generalizes across naming conventions or is specific to certain label pairs.
+
+\subsection{Experiment Priority and Feasibility}
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}llrrll@{}}
+\toprule
+\textbf{Exp} & \textbf{Name} & \textbf{Runs} & \textbf{Est.\ hours} & \textbf{Priority} & \textbf{Infra} \\
+\midrule
+1 & Label Effect           & 750   & $\sim$50h  & Highest  & CLI only \\
+3 & Coup Threshold         & 1,200 & $\sim$80h  & Highest  & CLI only \\
+4 & Crystallization        & 400   & $\sim$27h  & High     & CLI only \\
+2 & Temporal Primacy       & 750   & $\sim$50h  & Medium   & CLI only \\
+5 & Convergence Bias       & 500   & $\sim$33h  & Medium   & CLI only \\
+6 & Cross-Framework        & TBD   & TBD        & Low      & Framework-specific \\
+\midrule
+  & \textbf{Total (Exp 1--5)} & \textbf{3,600} & \textbf{$\sim$240h} & & \\
+\bottomrule
+\end{tabular}
+\caption{Experiment priority. Exp~1 and Exp~3 are run first; remaining experiments depend on whether hierarchy effects are measurable.}
+\label{tab:priority}
+\end{table}
+
+% ------------------------------------------------------------------
+\section{Expected Contributions}
+
+\begin{enumerate}[nosep]
+    \item \textbf{Hierarchy Calibration Score ($C$)}: a metric distinguishing functional hierarchy (authority tracks quality) from structural hierarchy (authority tracks position). First application of human organizational calibration concepts to multi-agent AI protocol design.
+    \item \textbf{Coup Threshold ($\tau$)}: quantifying the conditions under which a subordinate agent overrides a dominant agent---the LLM analog of CRM's first-officer override.
+    \item \textbf{Three-outcome spectrum}: excessive hierarchy / calibrated hierarchy / flattening, with experimental criteria to distinguish each. ``Hierarchy elimination'' is not the design goal; calibration is.
+    \item \textbf{Cross-framework generality}: label effects tested across generic setups, Ploidy, and MetaGPT naming conventions.
+    \item \textbf{Practical design principles}: concrete protocol changes (blind-by-default, simultaneous position generation, convergence anonymization, no-penalty override) grounded in CRM, andon cord, and surgical checklist precedents.
+\end{enumerate}
+
+% ------------------------------------------------------------------
+\section{Discussion}
+\label{sec:discussion}
+
+\subsection{Hierarchy as Design Variable}
+
+Human organizational research converges on a consistent lesson: \textbf{eliminating hierarchy fails; calibrating hierarchy succeeds}.
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Domain} & \textbf{Elimination attempt} & \textbf{Result} & \textbf{Calibration design} \\
+\midrule
+Manufacturing & Volvo Kalmar (1974) & Plant closed & Toyota andon cord \\
+Corporate     & Zappos Holacracy (2013) & 30\% attrition & Google code review culture \\
+Aviation      & ---                     & ---            & CRM (1979--) \\
+Medicine      & ---                     & ---            & WHO checklist (2009) \\
+\bottomrule
+\end{tabular}
+\caption{Hierarchy elimination vs.\ calibration in human organizations.}
+\label{tab:elimination_vs_calibration}
+\end{table}
+
+For multi-agent AI systems, this suggests: instead of removing role labels entirely (blind-by-default), the optimal design may be \emph{conditional blinding}---labels visible when the dominant agent's confidence is high, hidden when confidence is low, forcing independent evaluation when it matters most.
+
+\subsection{The Andon Cord for AI Debate}
+
+Toyota's andon cord succeeds because:
+\begin{enumerate}[nosep]
+    \item \textbf{Low challenge cost}: pulling the cord requires no approval.
+    \item \textbf{No false-positive penalty}: workers are never punished for unnecessary stops.
+    \item \textbf{Immediate response}: team leaders investigate immediately.
+\end{enumerate}
+
+For a subordinate agent's override to function as an andon cord:
+\begin{itemize}[nosep]
+    \item Challenge cost must be low (role labels that imply subordination raise this cost).
+    \item Consistent rejection by the convergence engine creates implicit penalty.
+    \item Override must be reflected in the final synthesis, not filtered.
+\end{itemize}
+
+Exp~3 (Coup Threshold) diagnoses which of these three conditions breaks.
+
+\subsection{Beyond Ploidy: Protocol Hierarchy in the Wild}
+
+Every multi-agent framework implicitly designs inter-agent relationships:
+
+\begin{itemize}[nosep]
+    \item \textbf{MetaGPT}: CEO $\to$ CTO $\to$ Engineer $\to$ QA. Explicit command hierarchy.
+    \item \textbf{CrewAI}: leader/worker. Manager agent delegates and evaluates.
+    \item \textbf{AutoGen}: admin/assistant. Admin initiates, assistant responds.
+    \item \textbf{Ploidy}: Deep/Fresh. Information asymmetry as designed feature.
+\end{itemize}
+
+None of these frameworks measure whether their role labels create calibrated or uncalibrated hierarchy. Our $C(P)$ metric applies to all of them.
+
+\subsection{Connection to the Accumulation-Renewal Dilemma}
+
+\citet{song2026ploidy} identify three scales at which homogeneous accumulation degrades intelligence: session (context entrenchment), model (model collapse), and internet (content homogenization). Protocol-level hierarchy reproduction is a fourth scale:
+
+\begin{table}[h]
+\centering
+\small
+\begin{tabular}{@{}llll@{}}
+\toprule
+\textbf{Scale} & \textbf{Phenomenon} & \textbf{Accumulates} & \textbf{Renewal} \\
+\midrule
+Session  & Context entrenchment  & Context tokens     & Fresh session \\
+Model    & Model collapse        & Training data      & Fresh real data \\
+Internet & Dead Internet         & Synthetic content  & (Unsolved) \\
+Protocol & Hierarchy reproduction & Structural asymmetry & Calibration design \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Limitations}
+
+\begin{itemize}[nosep]
+    \item \textbf{Blind condition leakage}: even without role labels, information asymmetry itself signals roles (longer responses $\to$ inferred ``expert''). The manipulation check (Exp~1) measures this, but cannot fully eliminate it.
+    \item \textbf{Ground truth dependency}: $C(P)$ requires knowing which agent's position is ``better,'' inheriting the author-defined ground truth limitation. Error-injection tasks (Exp~3) partially address this by creating unambiguous ground truth.
+    \item \textbf{Functional analogy, not mechanistic equivalence}: a first officer's silence stems from career risk and social pressure; an LLM's deference stems from training data patterns. The structural parallel (hierarchy $\to$ suppressed dissent) holds; the mechanism differs.
+    \item \textbf{Task dependence}: coup threshold likely varies by task type. 25 tasks across domains provide breadth but not exhaustive coverage.
+    \item \textbf{Scale}: 3,600 runs at $\sim$4 min each requires $\sim$240 compute-hours. Prioritized execution (Exp~1, 3 first) allows early termination if effects are unmeasurable.
+\end{itemize}
+
+% ------------------------------------------------------------------
+\section{Conclusion}
+
+The question is not whether hierarchy exists between AI agents---every protocol creates it. The question is whether that hierarchy is calibrated: does authority track judgment quality, or does it track structural position? Human organizations spent decades learning that hierarchy elimination fails and hierarchy calibration succeeds. Multi-agent AI systems have not yet begun this conversation. We propose the tools---$C(P)$ and $\tau$---to start it.
+
+% ------------------------------------------------------------------
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}
