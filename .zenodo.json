@@ -1,0 +1,30 @@
+{
+  "title": "Coup: When Protocol Design Creates Hierarchy Between AI Agents",
+  "description": "Concept note introducing the Hierarchy Calibration Score C(P) and the Coup Threshold tau for multi-agent LLM debate protocols. Companion to ploidy in Research Program 2 (Epistemic Failure and Correction).",
+  "creators": [
+    {
+      "name": "Yoon, Jiyeon",
+      "affiliation": "Independent Researcher"
+    }
+  ],
+  "keywords": [
+    "multi-agent systems",
+    "large language models",
+    "hierarchy calibration",
+    "debate protocols",
+    "AI alignment",
+    "crew resource management"
+  ],
+  "license": "CC-BY-4.0",
+  "upload_type": "publication",
+  "publication_type": "preprint",
+  "access_right": "open",
+  "language": "eng",
+  "related_identifiers": [
+    {
+      "identifier": "https://github.com/heznpc/coup",
+      "relation": "isSupplementTo",
+      "resource_type": "software"
+    }
+  ]
+}
