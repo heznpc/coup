@@ -21,10 +21,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
       - name: Compile main.tex
-        uses: xu-cheng/latex-action@v3
+        uses: xu-cheng/latex-action@v4
         with:
           working_directory: paper
           root_file: main.tex
@@ -34,7 +34,7 @@ jobs:
 
       - name: Upload PDF artifact
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: coup-main-pdf
           path: paper/main.pdf
