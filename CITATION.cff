@@ -8,7 +8,6 @@ abstract: >-
   hierarchy (deference stuck on structural rank), drawing on human organizational
   research such as aviation Crew Resource Management. Companion to ploidy in
   Research Program 2 (Epistemic Failure and Correction).
-type: article
 authors:
   - family-names: Yoon
     given-names: Jiyeon
@@ -23,4 +22,12 @@ keywords:
 license: CC-BY-4.0
 repository-code: "https://github.com/heznpc/coup"
 url: "https://github.com/heznpc/coup"
-date-released: 2026-04-19
+preferred-citation:
+  type: generic
+  title: "Coup: When Protocol Design Creates Hierarchy Between AI Agents"
+  authors:
+    - family-names: Yoon
+      given-names: Jiyeon
+      affiliation: Independent Researcher
+  year: 2026
+  notes: "Concept note. Not yet released as preprint or journal article."

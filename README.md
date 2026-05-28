@@ -2,9 +2,11 @@
 
 This is a concept note, not a finished paper.
 
+```
 Research Program: 2 (Epistemic Failure and Correction)
 Status: Concept note
 Relationship to other work: Companion to ploidy
+```
 
 ---
 
@@ -26,19 +28,19 @@ Independent paper targeting general multi-agent debate protocols. Ploidy, MetaGP
 ## Repository layout
 
 ```
-paper/                 Manuscript source of truth
-  main.tex             426-line draft (April 2026)
+paper/                 Manuscript source of truth (Domain)
+  main.tex             April 2026 draft
   references.bib
   figures/
-experiments/           Skeleton — Exp 1 / 3 pilot forthcoming
+experiments/           Skeleton — Exp 1 / 3 pilot forthcoming (Application)
 literature/            Reading notes, gap analysis
-planning/              Decisions log + superseded v3 outline
+planning/              decisions.md + drafts/outline.md (superseded v3)
 ```
 
 ## Currently implemented
 
-- 426-line draft (`paper/main.tex`) covering abstract, introduction, related work, six proposed experiments, and the C(P) / τ formalism
-- Repository skeleton in DDD-style layout (paper / experiments / literature / planning)
+- Draft manuscript (`paper/main.tex`) covering abstract, introduction, related work, six proposed experiments, and the C(P) / τ formalism
+- Repository skeleton in DDD-style layout (paper = Domain / experiments = Application / literature / planning)
 
 ## Planned
 
@@ -56,10 +58,16 @@ The hierarchy-calibration framing is deliberately distinct from "anti-hierarchy"
 - Not an empirical claim — pilot data is not yet collected
 - Not a prescription for a specific protocol; the contribution is the measurement apparatus
 
+## Redacted
+
+- External persons named in any draft material — not surfaced in published prose, citations, or acknowledgements
+- Internal critique vocabulary about pilot scope or reviewer expectations — paraphrased into framing claims rather than reproduced verbatim
+- Account identifiers, tokens, or session metadata — never committed; SECURITY.md is the private channel for any accidental leak
+
 ## Companion relationship
 
 Coup sits next to ploidy in Program 2 (Epistemic Failure and Correction). Ploidy anchors the program with calibrated-vs-uncalibrated *judgment* between sessions; coup extends the same question to *hierarchy between agents inside a debate protocol*. The two papers share the calibration vocabulary but stand independently — coup does not require ploidy's machinery to read or reproduce.
 
 ## License
 
-CC-BY 4.0
+CC-BY-4.0 — see `LICENSE` for the full text and `CITATION.cff` for the canonical attribution name.

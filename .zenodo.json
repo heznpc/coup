@@ -1,6 +1,6 @@
 {
   "title": "Coup: When Protocol Design Creates Hierarchy Between AI Agents",
-  "description": "Concept note introducing the Hierarchy Calibration Score C(P) and the Coup Threshold tau for multi-agent LLM debate protocols. Companion to ploidy in Research Program 2 (Epistemic Failure and Correction).",
+  "description": "Concept note introducing the Hierarchy Calibration Score C(P) and the Coup Threshold tau for multi-agent LLM debate protocols. The paper distinguishes calibrated hierarchy (deference tracking judgment quality) from uncalibrated hierarchy (deference stuck on structural rank), drawing on human organizational research such as aviation Crew Resource Management. Companion to ploidy in Research Program 2 (Epistemic Failure and Correction).",
   "creators": [
     {
       "name": "Yoon, Jiyeon",
@@ -23,8 +23,8 @@
   "related_identifiers": [
     {
       "identifier": "https://github.com/heznpc/coup",
-      "relation": "isSupplementTo",
-      "resource_type": "software"
+      "relation": "isSupplementedBy",
+      "resource_type": "publication-preprint"
     }
   ]
 }
