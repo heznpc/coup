@@ -2,11 +2,9 @@
 
 This is a concept note, not a finished paper.
 
-```
-Research Program: 2 (Epistemic Failure and Correction)
-Status: Concept note
+Research Program: 2 (Epistemic Failure and Correction)\
+Status: Concept note\
 Relationship to other work: Companion to ploidy
-```
 
 ---
 
@@ -31,7 +29,7 @@ Independent paper targeting general multi-agent debate protocols. Ploidy, MetaGP
 paper/                 Manuscript source of truth (Domain)
   main.tex             April 2026 draft
   references.bib
-  figures/
+  figures/             (placeholder — no figures yet)
 experiments/           Skeleton — Exp 1 / 3 pilot forthcoming (Application)
 literature/            Reading notes, gap analysis
 planning/              decisions.md + drafts/outline.md (superseded v3)

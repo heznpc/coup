@@ -17,14 +17,14 @@
   ],
   "license": "CC-BY-4.0",
   "upload_type": "publication",
-  "publication_type": "preprint",
+  "publication_type": "workingpaper",
   "access_right": "open",
   "language": "eng",
   "related_identifiers": [
     {
       "identifier": "https://github.com/heznpc/coup",
       "relation": "isSupplementedBy",
-      "resource_type": "publication-preprint"
+      "resource_type": "software"
     }
   ]
 }

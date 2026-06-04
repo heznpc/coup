@@ -5,10 +5,14 @@ on:
     branches: [main]
     paths:
       - "paper/**"
+      - "CITATION.cff"
+      - ".zenodo.json"
       - ".github/workflows/build-pdf.yml"
   pull_request:
     paths:
       - "paper/**"
+      - "CITATION.cff"
+      - ".zenodo.json"
       - ".github/workflows/build-pdf.yml"
   workflow_dispatch:
 
@@ -17,7 +21,9 @@ permissions:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  # Cancel superseded runs only on PR iterations; never cancel a main-branch
+  # build, so every merged commit keeps its own PDF artifact + build record.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   build:
@@ -57,3 +63,40 @@ jobs:
             paper/main.bbl
           if-no-files-found: ignore
           retention-days: 7
+
+  validate-metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Install validators
+        run: pip install cffconvert pyyaml
+
+      - name: Validate CITATION.cff against the CFF schema
+        run: cffconvert --validate -i CITATION.cff
+
+      - name: Validate .zenodo.json is well-formed JSON
+        run: python3 -m json.tool .zenodo.json > /dev/null
+
+      - name: Check abstract and Zenodo description stay in sync
+        run: |
+          python3 - <<'PY'
+          import json, sys, yaml
+          cff = yaml.safe_load(open("CITATION.cff"))
+          zen = json.load(open(".zenodo.json"))
+          abstract = " ".join((cff.get("abstract") or "").split())
+          description = " ".join((zen.get("description") or "").split())
+          if abstract != description:
+              print("::error::CITATION.cff 'abstract' and .zenodo.json 'description' have drifted; edit paper/main.tex first, then mirror both.")
+              print("abstract   :", abstract[:160])
+              print("description:", description[:160])
+              sys.exit(1)
+          print("abstract and Zenodo description are in sync")
+          PY
