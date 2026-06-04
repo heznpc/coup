@@ -1,6 +1,9 @@
 cff-version: 1.2.0
 message: "If you cite this work, please use the metadata below."
 title: "Coup: When Protocol Design Creates Hierarchy Between AI Agents"
+# abstract mirrors paper/main.tex \begin{abstract} and .zenodo.json "description".
+# Edit the .tex first; the build-pdf workflow fails CI if this and the
+# .zenodo.json description drift out of sync.
 abstract: >-
   Concept note introducing the Hierarchy Calibration Score C(P) and the Coup
   Threshold tau for multi-agent LLM debate protocols. The paper distinguishes
@@ -22,8 +25,11 @@ keywords:
 license: CC-BY-4.0
 repository-code: "https://github.com/heznpc/coup"
 url: "https://github.com/heznpc/coup"
+# CFF top-level `type` only accepts software/dataset, so the paper type is
+# expressed here. title/authors are restated because a CFF reference object
+# requires them; keep them identical to the top-level fields above.
 preferred-citation:
-  type: generic
+  type: unpublished
   title: "Coup: When Protocol Design Creates Hierarchy Between AI Agents"
   authors:
     - family-names: Yoon

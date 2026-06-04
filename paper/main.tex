@@ -15,7 +15,7 @@
 \newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
 
 \title{Coup: When Protocol Design Creates Hierarchy Between AI Agents\\
-\large Calibrated vs.\ Uncalibrated Authority in Multi-Agent Debate}
+\large Calibrated vs.\ Uncalibrated Hierarchy in Multi-Agent LLM Debate Protocols}
 
 \author{Jiyeon Yoon}
 
@@ -35,7 +35,7 @@ Multi-agent LLM frameworks assign structural roles to agents---leader/worker, ex
 % 1.1
 \subsection{The Role Label Problem}
 
-Every multi-agent LLM framework assigns roles. MetaGPT designates agents as CEO, CTO, and Engineer \citep{hong2024metagpt}. CrewAI assigns leaders and workers. AutoGen distinguishes admin from assistant. Ploidy labels sessions as ``Deep'' (context-rich) and ``Fresh'' (context-free) \citep{song2026ploidy}. These labels are designed for coordination, but they may also function as authority signals.
+Every multi-agent LLM framework assigns roles. MetaGPT designates agents as CEO, CTO, and Engineer \citep{hong2024metagpt}. CrewAI assigns leaders and workers. AutoGen distinguishes admin from assistant. Ploidy labels sessions as ``Deep'' (context-rich) and ``Fresh'' (context-free) \citep{yoon2026ploidy}. These labels are designed for coordination, but they may also function as authority signals.
 
 When a human organization assigns the title ``Senior Analyst'' versus ``Junior Reviewer,'' decades of organizational research shows this affects whose ideas get heard \citep{edmondson1999psychological}. The question is whether LLM agents exhibit analogous behavior: does a model labeled ``Fresh'' self-handicap, producing shorter and less confident responses---not because it lacks capability, but because the label implies subordination?
 
@@ -391,7 +391,7 @@ None of these frameworks measure whether their role labels create calibrated or 
 
 \subsection{Connection to the Accumulation-Renewal Dilemma}
 
-\citet{song2026ploidy} identify three scales at which homogeneous accumulation degrades intelligence: session (context entrenchment), model (model collapse), and internet (content homogenization). Protocol-level hierarchy reproduction is a fourth scale:
+\citet{yoon2026ploidy} identify three scales at which homogeneous accumulation degrades intelligence: session (context entrenchment), model (model collapse), and internet (content homogenization). Protocol-level hierarchy reproduction is a fourth scale:
 
 \begin{table}[h]
 \centering

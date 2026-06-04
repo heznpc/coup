@@ -16,7 +16,7 @@
 
 ### 1.1 The Stochastic Branching Problem
 
-동일 모델에 동일 질문을 던져도 매 세션마다 다른 답변이 나온다. 사용자가 가설 B를 모델 A에 제안하면 n개 세션에서 n가지 답변이 나오고, 찬성/반대/중립으로 갈린다. 하나의 세션에서만 대화를 이어가면 첫 응답의 확률적 샘플이 이후 전체 경로를 결정한다 — 사용자는 운에 맡기는 것이다 (Song, 2026, Paper 1 §1.3).
+동일 모델에 동일 질문을 던져도 매 세션마다 다른 답변이 나온다. 사용자가 가설 B를 모델 A에 제안하면 n개 세션에서 n가지 답변이 나오고, 찬성/반대/중립으로 갈린다. 하나의 세션에서만 대화를 이어가면 첫 응답의 확률적 샘플이 이후 전체 경로를 결정한다 — 사용자는 운에 맡기는 것이다 (Yoon, 2026, Paper 1 §1.3).
 
 ### 1.2 Ploidy's Solution and Its Communication Problem
 
@@ -371,7 +371,7 @@ Paper 1의 3-scale spectrum에 4번째 scale 추가:
 ## References (Preliminary)
 
 ### Ploidy
-- Song (2026). Ploidy: Context Asymmetry as Bias Reduction.
+- Yoon (2026). Ploidy: Context Asymmetry as Bias Reduction.
 
 ### Agent-to-Agent Sycophancy
 - Yao et al. (2025). "Peacemaker or Troublemaker: How Sycophancy Shapes Multi-Agent Debate." arXiv:2509.23055.
